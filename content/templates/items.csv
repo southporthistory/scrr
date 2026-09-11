@@ -1,0 +1,2 @@
+id,status,title,description,collection_ids,display_date,start_year,end_year,media_type,drive_file_id,view_url,subjects,people,places,featured
+item-001,published,"Southport waterfront, circa 1948","View looking west.",photographs,1948,1948,1948,image,DRIVE_FILE_ID,https://drive.google.com/file/d/DRIVE_FILE_ID/view,"Waterfront|Commercial fishing","","Southport",true

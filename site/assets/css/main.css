@@ -1,0 +1,552 @@
+/* ==========================================================================
+   Susie Carson Research Room — archival interface
+   Chrome stays quiet so hundred-year-old photographs can carry the page.
+   ========================================================================== */
+
+:root {
+  --ink:        #1a1a17;
+  --ink-2:      #3d3d36;
+  --muted:      #6b6b60;
+  --faint:      #9a9a8d;
+  --rule:       #ddd8cc;
+  --rule-soft:  #e9e4d9;
+  --paper:      #f5f2ec;
+  --paper-2:    #fbf9f5;
+  --white:      #ffffff;
+  --oxblood:    #7c3b2e;
+  --oxblood-2:  #9c4d3d;
+  --sea:        #2f5464;
+  --ochre:      #a8762c;
+  --shadow:     0 1px 2px rgba(26,26,23,.06), 0 8px 24px -12px rgba(26,26,23,.18);
+  --shadow-lg:  0 2px 4px rgba(26,26,23,.06), 0 24px 60px -20px rgba(26,26,23,.3);
+
+  --serif: "Source Serif 4", ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --sans:  "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:  ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  --rail: 264px;
+  --pad: clamp(1.25rem, 4vw, 3rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* The background is set on html too: on a short page the body box ends above
+   the fold and the browser's white would show as a band beneath the footer. */
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; background: var(--paper); }
+
+body {
+  margin: 0;
+  /* Keeps the footer at the bottom when the results are few, instead of
+     stranding it mid-screen. */
+  min-height: 100vh; display: flex; flex-direction: column;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.15; margin: 0; letter-spacing: -.01em; }
+p { margin: 0 0 1em; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+button { font: inherit; color: inherit; }
+
+:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 3px; border-radius: 2px; }
+
+/* Parked above the fold rather than at left:-9999px: an off-canvas element to
+   the left still counts toward the scrollable area in some browsers, which is a
+   silent source of horizontal scroll on narrow screens. */
+.skip {
+  position: absolute; left: 0; top: 0; z-index: 200;
+  transform: translateY(-130%); transition: transform .15s;
+  background: var(--ink); color: var(--paper); padding: .75rem 1.25rem; border-radius: 0 0 4px 0;
+}
+.skip:focus { transform: none; }
+
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ------------------------------------------------------------------ shell */
+
+.wrap { max-width: 1400px; margin: 0 auto; padding-inline: var(--pad); }
+.wrap--narrow { max-width: 760px; }
+.wrap--mid { max-width: 1080px; }
+
+.masthead {
+  position: sticky; top: 0; z-index: 60;
+  background: rgba(245,242,236,.92);
+  backdrop-filter: saturate(160%) blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+.masthead__in { display: flex; align-items: center; gap: 2rem; min-height: 68px; }
+
+.wordmark { display: flex; align-items: baseline; gap: .6rem; text-decoration: none; margin-right: auto; }
+.wordmark strong { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; letter-spacing: -.015em; }
+.wordmark span {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .13em;
+  color: var(--muted); border-left: 1px solid var(--rule); padding-left: .6rem;
+}
+@media (max-width: 640px) { .wordmark span { display: none; } }
+
+.nav { display: flex; gap: .35rem; align-items: center; }
+.nav a {
+  text-decoration: none; font-size: .875rem; color: var(--muted);
+  padding: .45rem .7rem; border-radius: 4px; transition: color .15s, background .15s;
+}
+.nav a:hover { color: var(--ink); background: rgba(26,26,23,.05); }
+.nav a[aria-current="page"] { color: var(--ink); font-weight: 500; }
+.nav a[aria-current="page"]::after {
+  content: ""; display: block; height: 2px; background: var(--oxblood); margin-top: .3rem; border-radius: 2px;
+}
+
+/* Below 640px the wordmark and four nav items cannot share a line — they were
+   overflowing the viewport and taking the whole page's horizontal scroll with
+   them. The nav drops to its own row and may scroll sideways on its own. */
+@media (max-width: 640px) {
+  .masthead__in { flex-wrap: wrap; gap: 0 1rem; min-height: 0; padding-block: .55rem; }
+  .wordmark { margin-right: 0; }
+  .nav {
+    width: 100%; margin-left: -.7rem;
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a { white-space: nowrap; }
+}
+
+/* --------------------------------------------------------------- footer */
+
+main { flex: 1 0 auto; }
+.foot { flex-shrink: 0; border-top: 1px solid var(--rule); margin-top: 5rem; padding: 3rem 0 4rem; background: var(--paper-2); }
+.foot__grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2.5rem; }
+@media (max-width: 760px) { .foot__grid { grid-template-columns: 1fr; gap: 1.75rem; } }
+.foot h4 { font-family: var(--sans); font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--faint); margin-bottom: .75rem; }
+.foot p, .foot li { font-size: .85rem; color: var(--muted); }
+.foot ul { list-style: none; padding: 0; margin: 0; }
+.foot li { margin-bottom: .35rem; }
+.foot a { color: var(--muted); text-decoration-color: var(--rule); text-underline-offset: 3px; }
+.foot a:hover { color: var(--oxblood); }
+.rights {
+  margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--rule);
+  font-size: .78rem; color: var(--faint); display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+
+/* ============================================================ front door */
+
+/* padding-block, not the padding shorthand: this element is also a .wrap, and
+   the shorthand reset its padding-inline to 0 — on a phone that put the
+   epigraph and the welcome text hard against both edges of the screen. */
+.epigraph { padding-block: clamp(3.5rem, 9vw, 7rem) clamp(2rem, 5vw, 3.5rem); }
+.epigraph blockquote {
+  margin: 0; font-family: var(--serif); font-size: clamp(1.35rem, 3.1vw, 2.15rem);
+  line-height: 1.34; letter-spacing: -.018em; color: var(--ink); max-width: 20ch;
+}
+.epigraph blockquote em { font-style: italic; color: var(--oxblood); }
+.epigraph cite {
+  display: block; margin-top: 1.5rem; font-style: normal; font-size: .8rem;
+  text-transform: uppercase; letter-spacing: .13em; color: var(--faint);
+}
+.epigraph__grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 6vw, 5rem); align-items: center; }
+@media (max-width: 900px) { .epigraph__grid { grid-template-columns: 1fr; } }
+
+.welcome { font-size: 1.02rem; color: var(--ink-2); max-width: 46ch; }
+.welcome strong { font-weight: 600; color: var(--ink); }
+
+/* mosaic of real thumbnails on the front door */
+.mosaic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.mosaic figure { margin: 0; position: relative; overflow: hidden; background: var(--rule-soft); aspect-ratio: 1; }
+.mosaic figure:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+.mosaic img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.82) contrast(1.03); transition: transform .7s cubic-bezier(.2,.7,.3,1), filter .4s; }
+.mosaic figure:hover img { transform: scale(1.05); filter: saturate(1) contrast(1.06); }
+
+/* audience router — the Society's own three phrasings */
+.paths { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border-block: 1px solid var(--rule); }
+@media (max-width: 780px) { .paths { grid-template-columns: 1fr; } }
+.path {
+  background: var(--paper); padding: 2rem 1.75rem 1.75rem; text-decoration: none; display: block;
+  transition: background .18s; position: relative;
+}
+.path:hover { background: var(--paper-2); }
+.path__k { font-size: .68rem; text-transform: uppercase; letter-spacing: .13em; color: var(--oxblood); margin-bottom: .85rem; }
+.path h3 { font-size: 1.28rem; margin-bottom: .5rem; }
+.path p { font-size: .86rem; color: var(--muted); margin: 0; }
+.path__go { margin-top: 1rem; font-size: .82rem; color: var(--ink); display: inline-flex; gap: .4rem; align-items: center; }
+.path:hover .path__go { color: var(--oxblood); }
+.path:hover .path__go span { transform: translateX(3px); }
+.path__go span { transition: transform .2s; }
+
+/* section furniture */
+.band { padding-block: clamp(3rem, 7vw, 5.5rem); }
+.band--tint { background: var(--paper-2); border-block: 1px solid var(--rule); }
+.band__head { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-bottom: 2.25rem; flex-wrap: wrap; }
+.eyebrow { font-size: .68rem; text-transform: uppercase; letter-spacing: .14em; color: var(--faint); margin-bottom: .6rem; }
+.band__head h2 { font-size: clamp(1.5rem, 3.2vw, 2rem); letter-spacing: -.02em; }
+.band__head p { color: var(--muted); font-size: .92rem; max-width: 54ch; margin: .6rem 0 0; }
+
+.textlink { font-size: .86rem; color: var(--oxblood); text-decoration: none; white-space: nowrap; border-bottom: 1px solid rgba(124,59,46,.3); padding-bottom: 1px; }
+.textlink:hover { border-bottom-color: var(--oxblood); }
+
+/* ------------------------------------------------------------- stat rail */
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule); }
+@media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stat { background: var(--paper); padding: 1.5rem 1.25rem; }
+.stat b { display: block; font-family: var(--serif); font-size: clamp(1.6rem, 3.4vw, 2.3rem); font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+.stat span { display: block; margin-top: .5rem; font-size: .76rem; color: var(--muted); line-height: 1.4; }
+
+/* ---------------------------------------------------------- dual timeline */
+
+.tl { margin-top: 1rem; }
+.tl__legend { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; font-size: .78rem; color: var(--muted); }
+.tl__legend i { display: inline-block; width: 10px; height: 10px; margin-right: .45rem; vertical-align: -1px; border-radius: 2px; }
+.tl__chart { display: flex; align-items: flex-end; gap: clamp(2px, .5vw, 6px); height: 190px; padding-top: 1rem; }
+.tl__col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; height: 100%; position: relative; cursor: pointer; text-decoration: none; }
+.tl__bar { border-radius: 2px 2px 0 0; transition: opacity .18s, transform .18s; transform-origin: bottom; min-height: 2px; }
+.tl__bar--subject { background: var(--sea); }
+.tl__bar--pub { background: var(--ochre); opacity: .55; }
+.tl__col:hover .tl__bar { opacity: 1; transform: scaleY(1.03); }
+.tl__x { display: flex; gap: clamp(2px, .5vw, 6px); margin-top: .6rem; border-top: 1px solid var(--rule); padding-top: .55rem; }
+.tl__x span { flex: 1; text-align: center; font-size: .64rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+@media (max-width: 700px) { .tl__x span:nth-child(even) { visibility: hidden; } }
+.tl__tip {
+  position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%) translateY(-6px);
+  background: var(--ink); color: var(--paper); font-size: .72rem; padding: .5rem .7rem; border-radius: 4px;
+  white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 10; line-height: 1.5;
+}
+.tl__col:hover .tl__tip { opacity: 1; }
+/* A tip centred on an end column hangs off the side of the page and gives the
+   whole document a horizontal scrollbar. The outermost columns anchor to their
+   own edge instead of their centre. */
+.tl__col:nth-child(-n+3) .tl__tip { left: 0; transform: translateX(0) translateY(-6px); }
+.tl__col:nth-last-child(-n+3) .tl__tip { left: auto; right: 0; transform: translateX(0) translateY(-6px); }
+/* Without a pointer there is no hover to reveal these, so they are only a
+   source of overflow. Below 700px the bars are a few pixels wide and cannot be
+   aimed at anyway — the same width at which the axis starts dropping labels. */
+@media (hover: none), (max-width: 700px) { .tl__tip { display: none; } }
+
+/* ------------------------------------------------------------- stories */
+
+.stories { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+@media (max-width: 980px) { .stories { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .stories { grid-template-columns: 1fr; } }
+.story {
+  display: block; text-decoration: none; background: var(--white);
+  border: 1px solid var(--rule); border-radius: 3px; overflow: hidden;
+  transition: transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s, border-color .22s;
+}
+.story:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--faint); }
+.story__img { aspect-ratio: 3/2; background: var(--rule-soft); overflow: hidden; position: relative; }
+.story__img img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.8) contrast(1.04); transition: transform .7s cubic-bezier(.2,.7,.3,1); }
+.story:hover .story__img img { transform: scale(1.04); }
+.story__body { padding: 1.35rem 1.4rem 1.5rem; }
+.story__date { font-size: .68rem; text-transform: uppercase; letter-spacing: .13em; color: var(--oxblood); margin-bottom: .55rem; }
+.story h3 { font-size: 1.16rem; margin-bottom: .5rem; letter-spacing: -.015em; }
+.story p { font-size: .86rem; color: var(--muted); margin: 0 0 1rem; }
+.story__n { font-size: .74rem; color: var(--faint); border-top: 1px solid var(--rule-soft); padding-top: .8rem; }
+
+/* ============================================================== archive */
+
+.archive { display: grid; grid-template-columns: var(--rail) 1fr; gap: clamp(1.5rem, 3vw, 2.75rem); align-items: start; padding-top: 2rem; }
+@media (max-width: 900px) { .archive { grid-template-columns: 1fr; } }
+
+/* search */
+.search { position: relative; margin-bottom: 1.25rem; }
+.search input {
+  width: 100%; font: inherit; font-size: 1rem; padding: .8rem 2.4rem .8rem 2.6rem;
+  border: 1px solid var(--rule); border-radius: 3px; background: var(--white); color: var(--ink);
+  transition: border-color .15s, box-shadow .15s;
+}
+.search input:focus { outline: none; border-color: var(--sea); box-shadow: 0 0 0 3px rgba(47,84,100,.12); }
+.search input::placeholder { color: var(--faint); }
+/* type=search draws its own cancel button in WebKit, which would sit alongside
+   ours. */
+.search input::-webkit-search-cancel-button,
+.search input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+
+/* Direct child only. `.search svg` also matched the icon inside the clear
+   button, absolutely positioning it out of its own button — which collapsed the
+   button to its padding and left the cross floating past the field's edge. */
+.search > svg { position: absolute; left: .9rem; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none; }
+
+.search__clear {
+  position: absolute; right: .4rem; top: 50%; transform: translateY(-50%);
+  width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
+  background: none; border: 0; cursor: pointer; color: var(--faint); border-radius: 50%;
+}
+.search__clear[hidden] { display: none; }
+.search__clear:hover { color: var(--ink); background: rgba(26,26,23,.06); }
+
+/* facet rail */
+.rail { position: sticky; top: 84px; max-height: calc(100vh - 104px); overflow-y: auto; padding-right: .5rem; padding-bottom: 2rem; }
+@media (max-width: 900px) { .rail { position: static; max-height: none; overflow: visible; } }
+.rail::-webkit-scrollbar { width: 8px; }
+.rail::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 4px; }
+.rail::-webkit-scrollbar-track { background: transparent; }
+
+.facet { border-bottom: 1px solid var(--rule-soft); }
+.facet > summary {
+  cursor: pointer; list-style: none; padding: .85rem 0; display: flex; align-items: center; gap: .5rem;
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 500;
+}
+.facet > summary::-webkit-details-marker { display: none; }
+.facet > summary::after {
+  content: ""; width: 6px; height: 6px; margin-left: auto; border-right: 1.5px solid var(--faint);
+  border-bottom: 1.5px solid var(--faint); transform: rotate(45deg) translateY(-2px); transition: transform .2s;
+}
+.facet[open] > summary::after { transform: rotate(-135deg) translateY(-2px); }
+.facet > summary:hover { color: var(--ink); }
+.facet__body { padding-bottom: 1rem; max-height: 300px; overflow-y: auto; }
+.facet__body::-webkit-scrollbar { width: 6px; }
+.facet__body::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+
+/* The whole row is the target, not the 14px box inside it. The negative inset
+   lets the hover tint reach past the text without moving the checkbox out of
+   line with the section heading above it. */
+.opt {
+  display: flex; align-items: center; gap: .55rem; cursor: pointer;
+  font-size: .84rem; color: var(--ink-2); line-height: 1.35;
+  padding: .4rem .4rem .4rem .35rem; margin: 0 -.4rem 0 -.35rem;
+  border-radius: 3px; transition: background-color .12s, color .12s;
+}
+.opt:hover { color: var(--ink); background: rgba(26,26,23,.045); }
+
+/* Drawn rather than left to the OS, which renders a blue rounded square that
+   belongs to no other control on the page. appearance:none keeps the real
+   input in place, so the label, keyboard and screen reader all still work. */
+.opt input {
+  appearance: none; -webkit-appearance: none; margin: 0; flex-shrink: 0;
+  width: 15px; height: 15px; cursor: pointer;
+  border: 1px solid var(--rule); border-radius: 2px; background: var(--white);
+  background-repeat: no-repeat; background-position: center;
+  transition: background-color .12s, border-color .12s;
+}
+.opt:hover input { border-color: var(--faint); }
+.opt input:checked {
+  background-color: var(--oxblood); border-color: var(--oxblood);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='8' viewBox='0 0 10 8' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M1 4.2l2.6 2.6L9 1.4'/></svg>");
+}
+.opt input:focus-visible { outline: 2px solid var(--oxblood); outline-offset: 2px; }
+
+.opt em { font-style: normal; margin-left: auto; font-size: .72rem; color: var(--faint); font-variant-numeric: tabular-nums; padding-left: .5rem; }
+.opt--off { opacity: .38; }
+
+.rail__reset {
+  width: 100%; margin-top: 1.1rem; padding: .6rem; background: none; border: 1px solid var(--rule);
+  border-radius: 3px; cursor: pointer; font-size: .8rem; color: var(--muted); transition: all .15s;
+}
+.rail__reset:hover { border-color: var(--oxblood); color: var(--oxblood); }
+.rail__reset[disabled] { opacity: .4; cursor: default; }
+.rail__reset[disabled]:hover { border-color: var(--rule); color: var(--muted); }
+
+/* results toolbar */
+.toolbar { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding-bottom: 1rem; border-bottom: 1px solid var(--rule); margin-bottom: 1.5rem; }
+.count { font-size: .88rem; color: var(--muted); }
+.count b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.controls { display: flex; gap: 1.25rem; align-items: center; }
+.controls label { font-size: .78rem; color: var(--faint); margin-right: .4rem; }
+/* Native select chrome is the one element on the page still drawn by the OS,
+   and it reads as borrowed against everything around it. Suppressing the
+   default appearance means supplying our own chevron. */
+.controls select {
+  appearance: none; -webkit-appearance: none;
+  font: inherit; font-size: .82rem; padding: .4rem 1.75rem .4rem .6rem;
+  border: 1px solid var(--rule); border-radius: 3px;
+  background-color: var(--white); color: var(--ink); cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none' stroke='%239a9a8d' stroke-width='1.5'><path d='M1 1l4 4 4-4'/></svg>");
+  background-repeat: no-repeat; background-position: right .55rem center;
+  transition: border-color .15s;
+}
+.controls select:hover { border-color: var(--faint); }
+
+.chips { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.chip {
+  display: inline-flex; align-items: center; gap: .45rem; font-size: .78rem; padding: .3rem .5rem .3rem .65rem;
+  background: var(--ink); color: var(--paper); border: 0; border-radius: 100px; cursor: pointer;
+}
+.chip:hover { background: var(--oxblood); }
+.chip i { font-style: normal; opacity: .55; }
+
+/* results grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(206px, 1fr)); gap: 1.5rem 1.25rem; }
+.grid--list { grid-template-columns: 1fr; gap: 0; }
+
+.card { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; display: flex; flex-direction: column; font: inherit; }
+.card__img {
+  aspect-ratio: 4/3; background: var(--rule-soft); overflow: hidden; border-radius: 2px; position: relative;
+  border: 1px solid var(--rule-soft); transition: border-color .2s, box-shadow .2s;
+}
+.card:hover .card__img { border-color: var(--faint); box-shadow: var(--shadow); }
+.card__img img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.82) contrast(1.03); transition: transform .5s cubic-bezier(.2,.7,.3,1); background: var(--rule-soft); }
+.card:hover .card__img img { transform: scale(1.045); }
+.card__body { padding-top: .7rem; }
+.card__title { font-size: .87rem; line-height: 1.4; color: var(--ink); margin-bottom: .3rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.card:hover .card__title { color: var(--oxblood); }
+.card__meta { font-size: .73rem; color: var(--faint); display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+.card__meta b { font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* placeholder for items with no retrievable image */
+.ph { width: 100%; height: 100%; display: grid; place-items: center; background: repeating-linear-gradient(45deg, var(--rule-soft) 0 10px, var(--paper-2) 10px 20px); color: var(--faint); }
+.ph svg { opacity: .5; }
+
+.badge {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .09em; padding: .18rem .4rem;
+  border-radius: 2px; font-weight: 600; white-space: nowrap;
+}
+.badge--restricted { background: rgba(168,118,44,.16); color: #7d5410; }
+.badge--missing { background: rgba(124,59,46,.14); color: var(--oxblood); }
+.card__flag { position: absolute; top: .5rem; left: .5rem; z-index: 2; }
+
+/* list rows */
+.row { display: grid; grid-template-columns: 58px 1fr auto; gap: 1rem; align-items: center; padding: .75rem .5rem; border-bottom: 1px solid var(--rule-soft); cursor: pointer; background: none; border-left: 0; border-right: 0; border-top: 0; text-align: left; font: inherit; width: 100%; }
+.row:hover { background: var(--paper-2); }
+.row__img { width: 58px; height: 44px; object-fit: cover; border-radius: 2px; background: var(--rule-soft); }
+.row__t { font-size: .89rem; line-height: 1.4; }
+.row__m { font-size: .74rem; color: var(--faint); margin-top: .15rem; }
+.row__y { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sentinel { height: 1px; }
+.more { text-align: center; padding: 2.5rem 0; color: var(--faint); font-size: .84rem; }
+
+/* The empty state is a child of the results grid, so without this it is laid
+   out as one 206px column and wraps to a hard-to-read ribbon. */
+.empty { grid-column: 1 / -1; text-align: center; padding: 5rem 1rem; }
+.empty h3 { font-size: 1.3rem; margin-bottom: .6rem; }
+.empty p { color: var(--muted); font-size: .9rem; max-width: 42ch; margin-inline: auto; }
+
+/* ---------------------------------------------------------------- drawer */
+
+.scrim { position: fixed; inset: 0; background: rgba(26,26,23,.42); backdrop-filter: blur(2px); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100vw); z-index: 100;
+  background: var(--paper); border-left: 1px solid var(--rule); box-shadow: var(--shadow-lg);
+  transform: translateX(100%); transition: transform .3s cubic-bezier(.3,.8,.3,1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.drawer.on { transform: none; }
+.drawer__bar { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--rule); flex-shrink: 0; }
+.drawer__bar strong { font-family: var(--sans); font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 500; }
+.drawer__x { margin-left: auto; background: none; border: 0; cursor: pointer; color: var(--muted); padding: .4rem; line-height: 0; border-radius: 3px; }
+.drawer__x:hover { background: rgba(26,26,23,.07); color: var(--ink); }
+.drawer__scroll { overflow-y: auto; flex: 1; }
+.drawer__img { background: #14140f; display: grid; place-items: center; min-height: 220px; }
+.drawer__img img { max-height: 46vh; width: auto; max-width: 100%; object-fit: contain; }
+.drawer__body { padding: 1.5rem 1.5rem 2.5rem; }
+.drawer__body h2 { font-size: 1.4rem; line-height: 1.25; margin-bottom: 1rem; }
+
+.dl { display: grid; grid-template-columns: 116px 1fr; gap: .55rem 1rem; font-size: .85rem; margin: 1.5rem 0; padding-top: 1.25rem; border-top: 1px solid var(--rule); }
+.dl dt { color: var(--faint); font-size: .72rem; text-transform: uppercase; letter-spacing: .09em; padding-top: .18rem; }
+.dl dd { margin: 0; color: var(--ink-2); }
+.dl dd code { font-family: var(--mono); font-size: .78rem; color: var(--muted); word-break: break-all; }
+
+.tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+.tag { font-size: .76rem; padding: .22rem .55rem; background: var(--white); border: 1px solid var(--rule); border-radius: 100px; cursor: pointer; color: var(--ink-2); transition: all .15s; }
+.tag:hover { border-color: var(--oxblood); color: var(--oxblood); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1.1rem; border-radius: 3px;
+  text-decoration: none; font-size: .87rem; font-weight: 500; border: 1px solid transparent; cursor: pointer; transition: all .15s;
+}
+.btn--primary { background: var(--ink); color: var(--paper); }
+.btn--primary:hover { background: var(--oxblood); }
+.btn--ghost { border-color: var(--rule); color: var(--ink-2); background: var(--white); }
+.btn--ghost:hover { border-color: var(--faint); }
+.btn[aria-disabled="true"] { opacity: .5; pointer-events: none; }
+.btnrow { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1.25rem; }
+
+.note {
+  font-size: .82rem; padding: .85rem 1rem; border-radius: 3px; border-left: 2px solid;
+  background: var(--white); color: var(--ink-2); margin-bottom: 1.25rem;
+}
+.note--warn { border-color: var(--ochre); background: rgba(168,118,44,.07); }
+.note--stop { border-color: var(--oxblood); background: rgba(124,59,46,.06); }
+
+/* ============================================================ editorial */
+
+.prose { font-size: 1rem; line-height: 1.72; color: var(--ink-2); }
+.prose h2 { font-size: 1.45rem; margin: 2.75rem 0 .9rem; color: var(--ink); }
+.prose h3 { font-size: 1.08rem; margin: 2rem 0 .6rem; color: var(--ink); }
+.prose blockquote {
+  margin: 1.75rem 0; padding-left: 1.25rem; border-left: 2px solid var(--oxblood);
+  font-family: var(--serif); font-size: 1.1rem; line-height: 1.5; color: var(--ink);
+}
+.prose ul { padding-left: 1.15rem; }
+.prose li { margin-bottom: .5rem; }
+.prose a { color: var(--oxblood); text-underline-offset: 3px; }
+.lede { font-family: var(--serif); font-size: 1.2rem; line-height: 1.55; color: var(--ink); }
+
+.pagehead { padding-block: clamp(2.5rem, 6vw, 4.5rem) clamp(1.5rem, 4vw, 2.5rem); border-bottom: 1px solid var(--rule); }
+.pagehead h1 { font-size: clamp(1.9rem, 4.6vw, 2.9rem); letter-spacing: -.025em; margin-bottom: .75rem; }
+.pagehead p { color: var(--muted); max-width: 58ch; margin: 0; }
+
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+@media (max-width: 780px) { .cols2 { grid-template-columns: 1fr; gap: 1.5rem; } }
+
+.panel { background: var(--white); border: 1px solid var(--rule); border-radius: 3px; padding: 1.5rem 1.6rem; }
+.panel h3 { font-size: 1rem; margin-bottom: .75rem; }
+.panel p, .panel li { font-size: .88rem; color: var(--muted); }
+.panel p:last-child { margin-bottom: 0; }
+
+table.data { width: 100%; border-collapse: collapse; font-size: .86rem; margin: 1.5rem 0; }
+table.data th, table.data td { text-align: left; padding: .6rem .75rem; border-bottom: 1px solid var(--rule-soft); }
+table.data th { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); font-weight: 500; }
+table.data td b { font-variant-numeric: tabular-nums; }
+table.data tr:hover td { background: var(--paper-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ========================================================== collections */
+
+.shelves { padding: 2.5rem 0 1rem; border-top: 1px solid var(--rule); }
+.shelves:first-child { border-top: 0; }
+.shelves__head { margin-bottom: 1.75rem; max-width: 62ch; }
+.shelves__head h2 { font-size: 1.5rem; letter-spacing: -.02em; margin-bottom: .4rem; }
+.shelves__head p { font-size: .9rem; color: var(--muted); margin: 0; }
+
+.shelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.shelf { background: var(--paper); text-decoration: none; display: flex; flex-direction: column; transition: background .18s; }
+.shelf:hover { background: var(--paper-2); }
+.shelf__img { aspect-ratio: 4/3; overflow: hidden; background: var(--rule-soft); }
+.shelf__img img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.82) contrast(1.03); transition: transform .7s cubic-bezier(.2,.7,.3,1); }
+.shelf:hover .shelf__img img { transform: scale(1.04); }
+.shelf__body { padding: 1.05rem 1.15rem 1.15rem; display: flex; flex-direction: column; flex: 1; }
+.shelf__k { font-size: .66rem; text-transform: uppercase; letter-spacing: .12em; color: var(--oxblood); margin-bottom: .4rem; }
+.shelf h3 { font-size: 1.02rem; line-height: 1.25; margin-bottom: .45rem; letter-spacing: -.01em; }
+.shelf p { font-size: .82rem; color: var(--muted); margin: 0 0 .9rem; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.shelf__n { margin-top: auto; padding-top: .7rem; border-top: 1px solid var(--rule-soft);
+  display: flex; justify-content: space-between; gap: .75rem; font-size: .73rem; color: var(--faint); }
+
+/* the Society's own words, shown when the view narrows to one section */
+.secnote { background: var(--paper-2); border: 1px solid var(--rule); border-left: 3px solid var(--sea);
+  padding: 1.4rem 1.5rem; margin-bottom: 1.5rem; max-width: 78ch; }
+.secnote h2 { font-size: 1.3rem; letter-spacing: -.015em; margin-bottom: .7rem; }
+.secnote p { font-size: .88rem; color: var(--ink-2); margin: 0 0 .7rem; line-height: 1.6; }
+.secnote__lead { font-family: var(--serif); font-size: 1rem; color: var(--ink); }
+.secnote__src { margin: .9rem 0 0; font-size: .8rem; }
+
+@media print {
+  .masthead, .rail, .drawer, .scrim, .foot { display: none !important; }
+}
+.results { display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule); }
+.result { display:grid; grid-template-columns:112px 1fr; gap:1rem; text-align:left; border:0; background:var(--paper); padding:.75rem; cursor:pointer; color:inherit; }
+.result:hover { background:var(--paper-2); }
+.result__img { width:112px; aspect-ratio:4/3; overflow:hidden; background:var(--rule-soft); }
+.result__img img { width:100%; height:100%; object-fit:cover; }
+.result__body h3 { font-family:var(--serif); font-size:1rem; margin:.25rem 0; }
+.result__body p { color:var(--muted); font-size:.78rem; }
+/* Small-screen navigation is fully visible without requiring a hidden sideways scroll. */
+@media (max-width: 640px) {
+  .nav { margin-left: 0; overflow: visible; justify-content: space-between; gap: 0; }
+  .nav a { padding: .4rem .28rem; font-size: .76rem; }
+}
+/* Contain arbitrary Drive previews and long archival titles within the item drawer. */
+.drawer__img { overflow: hidden; padding: 1rem; }
+.drawer__img img { display: block; width: 100%; height: auto; max-width: 100%; object-fit: contain; }
+.drawer__body { min-width: 0; overflow-wrap: anywhere; }
+.drawer__body h2, .dl dd { max-width: 100%; overflow-wrap: anywhere; }
+@media (max-width: 420px) { .dl { grid-template-columns: 88px minmax(0, 1fr); } }

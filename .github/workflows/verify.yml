@@ -1,0 +1,18 @@
+name: Verify
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm run check
+        env:
+          CATALOG_SOURCE: fixture
+          FETCH_THUMBNAILS: "false"

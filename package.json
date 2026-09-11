@@ -1,0 +1,14 @@
+{
+  "name": "southport-archive",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Static discovery layer for the Southport Historical Society archive",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test",
+    "check": "npm run validate && npm test && npm run build",
+    "serve": "node scripts/serve.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

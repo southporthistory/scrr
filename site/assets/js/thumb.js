@@ -1,0 +1,2 @@
+function placeholderEl(){const d=document.createElement("div");d.className="ph";d.setAttribute("aria-hidden","true");d.innerHTML='<svg viewBox="0 0 48 48"><path d="M7 36l10-12 8 8 6-7 10 11M15 17h.01"/></svg>';return d;}
+function thumbImg(src,{alt="",className="",eager=false}={}){const img=document.createElement("img");img.src=src;img.alt=alt;img.className=className;img.loading=eager?"eager":"lazy";img.decoding="async";img.onerror=()=>img.replaceWith(placeholderEl());return img;}

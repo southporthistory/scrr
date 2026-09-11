@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://southporthistoricalsociety.org/schema/catalog-v1.json",
+  "title": "Southport Archive Canonical Catalog",
+  "type": "object",
+  "required": ["schemaVersion", "site", "collections", "items"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "site": {"type": "object", "required": ["name", "organization"]},
+    "collections": {"type": "array"},
+    "items": {"type": "array"}
+  }
+}

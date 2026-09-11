@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browse the archive — Susie Carson Research Room</title>
+<meta name="description" content="Search photographs, documents, video, audio, and family files from the Southport Historical Society.">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to results</a>
+
+<header class="masthead">
+  <div class="wrap masthead__in">
+    <a class="wordmark" href="index.html">
+      <strong>Susie Carson Research Room</strong>
+      <span>Southport Historical Society</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="collections.html">Collections</a>
+      <a href="archive.html" aria-current="page">Browse</a>
+      <a href="about.html">About &amp; Visit</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+  <div class="archive">
+
+    <aside aria-label="Filters">
+      <div class="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
+        </svg>
+        <input id="q" type="search" placeholder="Surname, street, year…" aria-label="Search the archive" autocomplete="off">
+        <button id="q-clear" class="search__clear" aria-label="Clear search" hidden>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div id="rail" class="rail"></div>
+    </aside>
+
+    <section>
+      <div class="toolbar">
+        <p id="count" class="count">Loading…</p>
+        <div class="controls">
+          <span><label for="sort">Sort</label>
+          <select id="sort">
+            <option value="chrono">Oldest subject first</option>
+            <option value="chrono-desc">Newest subject first</option>
+            
+            <option value="title">Title A–Z</option>
+          </select></span>
+          <span><label for="view">View</label>
+          <select id="view">
+            <option value="grid">Grid</option>
+            <option value="list">List</option>
+          </select></span>
+        </div>
+      </div>
+
+      <div id="chips" class="chips"></div>
+      <div id="secnote"></div>
+      <div id="grid" class="grid"></div>
+      <div id="sentinel" class="sentinel"></div>
+      <p id="more" class="more"></p>
+    </section>
+
+  </div>
+</main>
+
+<div id="scrim" class="scrim"></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-kind" aria-hidden="true">
+  <div class="drawer__bar">
+    <strong id="drawer-kind">Item</strong>
+    <button id="drawer-x" class="drawer__x" aria-label="Close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="drawer__scroll">
+    <div id="drawer-img" class="drawer__img"></div>
+    <div id="drawer-body" class="drawer__body"></div>
+  </div>
+</aside>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="rights">
+      <span>Permission to view these materials is not an authorization to publish them.</span>
+      <span>Southport Historical Society · P.O. Box 10014, Southport, NC 28461</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/thumb.js"></script>
+<script src="assets/js/archive.js"></script>
+</body>
+</html>
