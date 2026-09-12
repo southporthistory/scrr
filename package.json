@@ -7,8 +7,10 @@
     "build": "node scripts/build.mjs",
     "validate": "node scripts/validate.mjs",
     "test": "node --test",
-    "check": "npm run validate && npm test && npm run build",
+    "check": "npm run validate && npm run build && npm test",
     "serve": "node scripts/serve.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

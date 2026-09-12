@@ -10,9 +10,8 @@ const types={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=
 const compressed=new Map();
 function cacheControl(file){
   const rel=path.relative(base,file).replaceAll(path.sep,"/");
+  if(/(^|\/)[^/]+\.[a-f0-9]{12}\.(css|js|json)$/.test(rel))return "public, max-age=31536000, immutable";
   if(rel.startsWith("assets/thumbs/"))return "public, max-age=604800, stale-while-revalidate=86400";
-  if(rel.startsWith("assets/"))return "public, max-age=3600, stale-while-revalidate=86400";
-  if(rel==="data/catalog.json")return "public, max-age=300, stale-while-revalidate=3600";
   return "no-cache";
 }
 http.createServer((req,res)=>{

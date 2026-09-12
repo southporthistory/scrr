@@ -73,7 +73,32 @@ An hourly scheduled build is the recovery path if immediate dispatch fails.
 - `title`, optional `description`
 - One or more `collectionIds`
 - Structured `contentDate`: display label plus optional start/end years
+- Optional `publicationDate`: the date the underlying work was published or filed (distinct from CMS publication status)
 - `media`: type, Drive file ID, permanent public viewer URL
 - Optional subjects, people, places, and featured flag
 
 Counts, date facets, search material, thumbnail paths, and collection totals are derived publication state—not Sheet columns.
+
+## Cache coherence
+
+The build emits content-addressed names for every mutable browser asset:
+
+- `assets/css/main.<hash>.css`
+- `assets/js/archive.<hash>.js`
+- `data/catalog.<hash>.json`
+
+HTML is the only mutable entry point. When GitHub Pages serves a new HTML version, its asset URLs necessarily identify the matching CSS, JavaScript, and catalog payload. This prevents partial old/new renders even when the CDN or a phone retains prior assets. Thumbnails keep stable Drive-ID names because they are independent archival previews.
+
+## Curated homepage and collection imagery
+
+Representative imagery is managed through the same Google Sheet catalog as everything else:
+
+- `Items.homepage_slot` is blank for ordinary items or `1`–`6` for the six ordered homepage highlights. Each tile links to that exact archive record.
+- `Collections.cover_item_id` selects the representative image for that collection card.
+
+The future Workspace Manager presents visual pickers over those fields:
+
+- **Homepage highlights:** six numbered slots with thumbnail preview, Choose/Replace, and reorder. Saving updates `homepage_slot` on the affected Item rows.
+- **Collection cover:** one thumbnail picker on the Collection editor. Saving updates `cover_item_id` on that Collection row.
+
+Curators never type IDs and there is no separate YAML, JSON, or site-settings workflow. The build adapter reads the Items and Collections worksheets and compiles their values into the static site's publication JSON. See `content/templates/items.csv` and `content/templates/collections.csv` for the eventual worksheet columns.

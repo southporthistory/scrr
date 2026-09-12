@@ -20,7 +20,7 @@
       <a href="index.html">Home</a>
       <a href="collections.html">Collections</a>
       <a href="archive.html" aria-current="page">Browse</a>
-      <a href="about.html">About &amp; Visit</a>
+      <a href="about.html">About</a>
     </nav>
   </div>
 </header>
@@ -28,7 +28,8 @@
 <main id="main" class="wrap">
   <div class="archive">
 
-    <aside aria-label="Filters">
+    <aside id="filter-panel" class="filter-panel" aria-label="Filters" aria-hidden="false">
+      <div class="filter-panel__bar"><strong>Filter archive</strong><button id="filter-close" class="drawer__x" aria-label="Close filters">✕</button></div>
       <div class="search">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>
@@ -39,17 +40,26 @@
         </button>
       </div>
       <div id="rail" class="rail"></div>
+      <div class="filter-panel__actions"><button id="filter-clear" class="btn btn--ghost">Clear</button><button id="filter-apply" class="btn btn--primary">Apply filters</button></div>
     </aside>
 
-    <section>
+    <section class="archive-results">
+      <div class="mobile-browse-tools">
+        <div class="search mobile-search">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="mobile-q" type="search" placeholder="Surname, street, year…" aria-label="Search the archive" autocomplete="off">
+        </div>
+        <button id="filter-open" class="filter-open" aria-controls="filter-panel"><span>Filters</span><b id="filter-count" hidden>0</b></button>
+      </div>
       <div class="toolbar">
         <p id="count" class="count">Loading…</p>
         <div class="controls">
           <span><label for="sort">Sort</label>
           <select id="sort">
+            <option value="relevance">Relevance</option>
             <option value="chrono">Oldest subject first</option>
             <option value="chrono-desc">Newest subject first</option>
-            
+            <option value="published">Recently published</option>
             <option value="title">Title A–Z</option>
           </select></span>
           <span><label for="view">View</label>
@@ -63,13 +73,15 @@
       <div id="chips" class="chips"></div>
       <div id="secnote"></div>
       <div id="grid" class="grid"></div>
-      <div id="sentinel" class="sentinel"></div>
-      <p id="more" class="more"></p>
+      <div id="sentinel" class="sentinel" aria-hidden="true"></div>
+      <button id="more" class="more" type="button" hidden>Load more</button>
     </section>
 
   </div>
 </main>
 
+<div id="filter-scrim" class="scrim filter-scrim"></div>
+<button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top" title="Back to top" hidden><span aria-hidden="true">▲</span></button>
 <div id="scrim" class="scrim"></div>
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-kind" aria-hidden="true">
   <div class="drawer__bar">
@@ -87,13 +99,14 @@
 <footer class="foot">
   <div class="wrap">
     <div class="rights">
-      <span>Permission to view these materials is not an authorization to publish them.</span>
+      <span><a href="about.html#rights">Copyright, use &amp; publication policy</a></span>
       <span>Southport Historical Society · P.O. Box 10014, Southport, NC 28461</span>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/thumb.js"></script>
+<script src="assets/js/search.js"></script>
 <script src="assets/js/archive.js"></script>
 </body>
 </html>
