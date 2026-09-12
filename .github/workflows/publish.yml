@@ -31,10 +31,9 @@ jobs:
           restore-keys: thumbnails-
       - run: npm run check
         env:
-          CATALOG_SOURCE: json
-          SHEET_ITEMS_CSV_URL: ${{ secrets.SHEET_ITEMS_CSV_URL }}
-          SHEET_COLLECTIONS_CSV_URL: ${{ secrets.SHEET_COLLECTIONS_CSV_URL }}
-          CATALOG_JSON_PATH: content/catalog.json
+          CATALOG_SOURCE: sheet
+          SHEET_ITEMS_CSV_URL: ${{ vars.SHEET_ITEMS_CSV_URL }}
+          SHEET_COLLECTIONS_CSV_URL: ${{ vars.SHEET_COLLECTIONS_CSV_URL }}
           FETCH_THUMBNAILS: "false"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
