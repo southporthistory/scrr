@@ -19,5 +19,5 @@ function timeline(db){
     a.append(tip,published,subject);$("#tl").append(a);$("#tl-x").append(el("span",null,b.y%40===0?String(b.y):""));
   }
 }
-function stories(db){for(const st of db.site.features||[]){const it=db.items.find(x=>x.id===st.itemId);if(!it)continue;const q=norm(st.query),count=db.items.filter(i=>norm([i.title,i.description,...i.subjects,...i.people,...i.places].join(" ")).includes(q)).length,a=el("a","story");a.href=`archive.html?q=${encodeURIComponent(st.query)}`;const im=el("div","story__img");im.append(thumbImg(it.media.thumbnail));const body=el("div","story__body");body.append(el("div","story__date",st.kicker),el("h3",null,st.title),el("p",null,st.blurb),el("div","story__n",`${nfmt(count)} matching item${count===1?"":"s"}`));a.append(im,body);$("#stories").append(a);}}
-(async()=>{const db=await(await fetch("data/catalog.json")).json();mosaic(db);stats(db);timeline(db);stories(db);})();
+
+(async()=>{const db=await(await fetch("data/catalog.json")).json();mosaic(db);stats(db);timeline(db);})();

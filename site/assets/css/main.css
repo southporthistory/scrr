@@ -225,26 +225,6 @@ main { flex: 1 0 auto; }
    aimed at anyway — the same width at which the axis starts dropping labels. */
 @media (hover: none), (max-width: 700px) { .tl__tip { display: none; } }
 
-/* ------------------------------------------------------------- stories */
-
-.stories { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-@media (max-width: 980px) { .stories { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 620px) { .stories { grid-template-columns: 1fr; } }
-.story {
-  display: block; text-decoration: none; background: var(--white);
-  border: 1px solid var(--rule); border-radius: 3px; overflow: hidden;
-  transition: transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .22s, border-color .22s;
-}
-.story:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--faint); }
-.story__img { aspect-ratio: 3/2; background: var(--rule-soft); overflow: hidden; position: relative; }
-.story__img img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.8) contrast(1.04); transition: transform .7s cubic-bezier(.2,.7,.3,1); }
-.story:hover .story__img img { transform: scale(1.04); }
-.story__body { padding: 1.35rem 1.4rem 1.5rem; }
-.story__date { font-size: .68rem; text-transform: uppercase; letter-spacing: .13em; color: var(--oxblood); margin-bottom: .55rem; }
-.story h3 { font-size: 1.16rem; margin-bottom: .5rem; letter-spacing: -.015em; }
-.story p { font-size: .86rem; color: var(--muted); margin: 0 0 1rem; }
-.story__n { font-size: .74rem; color: var(--faint); border-top: 1px solid var(--rule-soft); padding-top: .8rem; }
-
 /* ============================================================== archive */
 
 .archive { display: grid; grid-template-columns: var(--rail) 1fr; gap: clamp(1.5rem, 3vw, 2.75rem); align-items: start; padding-top: 2rem; }
@@ -864,3 +844,6 @@ main.wrap { width: 100%; }
 .chip__remove { display:grid; place-items:center; width:26px; height:26px; padding:0; border:0; border-radius:50%; background:transparent; color:var(--muted); font:600 1rem/1 var(--sans); cursor:pointer; }
 .chip__remove:hover,.chip__remove:focus-visible { background:color-mix(in srgb,var(--oxblood) 10%,transparent); color:var(--oxblood); outline:0; }
 .chip__remove:focus-visible { box-shadow:0 0 0 2px color-mix(in srgb,var(--oxblood) 30%,transparent); }
+
+/* Home ends on a full-width band; hand it directly to the footer. */
+.home .foot { margin-top:0; }
